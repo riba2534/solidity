@@ -445,12 +445,16 @@ void ConstantEvaluator::endVisit(TupleExpression const& _tuple)
 
 void ConstantEvaluator::endVisit(FunctionCall const& _functionCall)
 {
-	auto const* builtinFunction = dynamic_cast<MagicVariableDeclaration const*>(ASTNode::referencedDeclaration(_functionCall.expression()));
-	if (!builtinFunction)
+	auto const* builtinVariable = dynamic_cast<MagicVariableDeclaration const*>(ASTNode::referencedDeclaration(_functionCall.expression()));
+	if (!builtinVariable)
 		return;
 
-	auto const* functionType = builtinFunction->functionType(true);
-	solAssert(functionType);
+	// Magic variables that are not functions (e.g. the `abi` namespace) are not callable at all.
+	// The type checker reports that, so just leave the call unevaluated here.
+	auto const* functionType = dynamic_cast<FunctionType const*>(builtinVariable->type());
+	if (!functionType)
+		return;
+
 	switch (functionType->kind())
 	{
 		case FunctionType::Kind::ERC7201:
