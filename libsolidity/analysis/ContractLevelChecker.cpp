@@ -236,8 +236,11 @@ void ContractLevelChecker::findDuplicateDefinitions(std::map<std::string, std::v
 	{
 		std::vector<T> const& overloads = it.second;
 		std::set<size_t> reported;
-		for (size_t i = 0; i < overloads.size() && !reported.count(i); ++i)
+		for (size_t i = 0; i < overloads.size(); ++i)
 		{
+			if (reported.count(i))
+				continue;
+
 			SecondarySourceLocation ssl;
 
 			for (size_t j = i + 1; j < overloads.size(); ++j)
